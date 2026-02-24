@@ -1,4 +1,4 @@
-name: Mirror to Codeberg & GitLab
+name: Mirror to GitLab
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: mirror-to-remotes
+  group: mirror-to-gitlab
   cancel-in-progress: true
 
 jobs:
@@ -22,24 +22,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Mirror push to Codeberg
-        env:
-          CODEBERG_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
-        run: |
-          set -euo pipefail
-          git fetch --prune --tags --force
-          CODEBERG_URL="https://eskopp:${CODEBERG_TOKEN}@codeberg.org/eskopp/polarvim.git"
-          git remote remove codeberg 2>/dev/null || true
-          git remote add codeberg "${CODEBERG_URL}"
-          git push --mirror --force codeberg
-
       - name: Mirror push to GitLab
         env:
+          GITLAB_USERNAME: ${{ secrets.GITLAB_USERNAME }}
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
         run: |
           set -euo pipefail
           git fetch --prune --tags --force
-          GITLAB_URL="https://oauth2:${GITLAB_TOKEN}@gitlab.erik-skopp.de/dotfiles/polarvim.git"
+          GITLAB_URL="https://${GITLAB_USERNAME}:${GITLAB_TOKEN}@gitlab.erik-skopp.de/dotfiles/polarvim.git"
           git remote remove gitlab 2>/dev/null || true
           git remote add gitlab "${GITLAB_URL}"
           git push --mirror --force gitlab
